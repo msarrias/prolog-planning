@@ -1,0 +1,53 @@
+
+/* Company logical puzzle: 
+	* S1) Rosie reports to the member who reports to the member
+    	sitting on the 3rd floor.
+	* S2) Frank occupies the manager position.
+	* S3) The immediate superior that receives reports from the member 
+     	sitting on the 12th floor sits on the 3rd floor.
+	* S4) Harry sits on the 9th floor.
+	* S5) Frank reports to Lily.
+	* S6) The member sitting on the 3rd floor reports to Harry.
+	* S7) The member that reports to Lily sits on the 12th floor.
+	* S8) The member occupying the manager position reports to the 
+    	member occupying the director position.
+	* S9) The member occupying the intern position reports to the 
+    	member occupying the manager position.
+    * S10) The member occupying the director position reports to the 
+    	member occupying the CEO position.
+    * S11) Rose sits on the 5th floor.
+*/
+
+% Render the persons term as a nice table.
+:- use_rendering(table,
+		 [header(person('name', 'position', 'floor'))]).
+
+reportsto(X,Y,Ls) :-
+    member(X,Ls),
+	member(Y,Ls),
+	((X=person(_,intern,_), Y=person(_,manager,_));
+     (X=person(_,manager,_), Y=person(_,director,_));
+     (X=person(_,director,_), Y=person(_,ceo,_))).
+
+company(Com) :-
+	% each employee in the list Com of members is represented as:
+	%      person(name, position, floor)
+    length(Com, 4), %there is exactly one person per floor.
+	(reportsto(person(rose,_,_), person(_,_,_), Com),			% S1
+    reportsto(person(_,_,_), person(_,_,3), Com)),
+	member(person(frank,manager,_), Com),                       % S2
+    reportsto(person(_,_,12), person(_,_,3), Com),              % S3
+	member(person(harry,_,9), Com),      		                % S4
+	reportsto(person(frank,_,_), person(lily,_,_), Com),        % S5
+	reportsto(person(_,_,3), person(harry,_,_), Com),	        % S6
+	reportsto(person(_,_,12), person(lily,_,_), Com),           % S7
+	reportsto(person(_,manager,_), person(_,director,_), Com),  % S8
+	reportsto(person(_,intern,_), person(_,manager,_), Com),    % S9
+	reportsto(person(_,director,_), person(_,ceo,_), Com),		% S10		
+    member(person(rose,_,5), Com).    							% S11
+
+/** <examples>
+
+?- company(Com).
+
+*/
